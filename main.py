@@ -34,6 +34,29 @@ async def cmd_start(message: types.Message):
     await message.answer("Привет! Пожалуйста, введи своё имя.")
 
 
+# todo ограничить доступ к функции
+@dp.message_handler(commands=['random_user'])
+async def cmd_random_user(message: types.Message):
+    user = await select_random_user()
+    if user:
+        user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
+
+        # Маскируем номер телефона
+        if tg_phone:
+            masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
+        else:
+            masked_phone = "не указан"
+
+        response = (
+            f"Имя: {first_name}\n"
+            f"Фамилия: {last_name}\n"
+            f"Телефон: {masked_phone}"
+        )
+    else:
+        response = "Пользователи не найдены."
+    await message.answer(response)
+
+
 @dp.message_handler(state=Form.waiting_for_first_name)
 async def process_first_name(message: types.Message, state: FSMContext):
     await state.update_data(first_name=message.text)
