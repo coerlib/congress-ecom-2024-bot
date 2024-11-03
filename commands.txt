@@ -1,0 +1,4 @@
+ssh root@45.147.178.172
+32BGvk%tHKNX
+
+nohup python3 main.py &
