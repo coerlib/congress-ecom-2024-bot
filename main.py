@@ -3,7 +3,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from config import API_TOKEN
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from config import *
 from requests import *
 
 
@@ -74,6 +75,12 @@ async def process_last_name(message: types.Message, state: FSMContext):
     await message.answer("Отлично! Нажми на кнопку или введи номер телефона текстом:", reply_markup=keyboard)
 
 
+# Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
+menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+menu_keyboard.add(KeyboardButton("Платный розыгрыш"))
+menu_keyboard.add(KeyboardButton("Соц опрос"))
+
+
 @dp.message_handler(content_types=types.ContentTypes.CONTACT, state=Form.waiting_for_phone)
 async def process_contact(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
@@ -87,7 +94,7 @@ async def process_contact(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=menu_keyboard)
     await state.finish()
 
 
@@ -104,8 +111,19 @@ async def process_phone(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=menu_keyboard)
     await state.finish()
+
+
+# Добавляем обработчик для кнопки "Платный розыгрыш"
+@dp.message_handler(lambda message: message.text == "Платный розыгрыш")
+async def paid_raffle_handler(message: types.Message):
+    # Создаем инлайн-кнопку с ссылкой на второго бота
+    raffle_bot_url = PAID_BOT_LINK
+    keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
+        "Перейти к платному розыгрышу", url=raffle_bot_url))
+
+    await message.answer("Переходите к платному розыгрышу:", reply_markup=keyboard)
 
 
 if __name__ == '__main__':
