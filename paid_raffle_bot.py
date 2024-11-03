@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher, executor, types
 from config import *
-from requests import *
+from requests_paid import *
 
 
 # Инициализация бота и диспетчера
