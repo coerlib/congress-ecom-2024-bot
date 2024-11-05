@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import PAID_RAFFLE_BOT_TOKEN, MAIN_BOT_LINK, MODERATOR_ID, DEV_ID
-from requests_paid import db_start, get_user_data
+from requests_paid import *
 
 bot = Bot(PAID_RAFFLE_BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -16,7 +16,11 @@ async def start_paid_raffle(message: types.Message):
     user = await get_user_data(message.from_user.id)
     if user:
         _, _, _, _, _, first_name, last_name, _, _, _ = user
-        await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату")
+        # Проверяем участие в розыгрыше
+        if await is_user_in_raffle(message.from_user.id):
+            await message.answer("Вы уже участвуете в платном розыгрыше")
+        else:
+            await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату.")
     else:
         main_bot_url = MAIN_BOT_LINK
         keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
@@ -27,6 +31,12 @@ async def start_paid_raffle(message: types.Message):
 @dp.message_handler(content_types=[types.ContentType.DOCUMENT, types.ContentType.PHOTO])
 async def handle_payment_confirmation(message: types.Message):
     user_id = message.from_user.id
+
+    # Проверяем, участвует ли пользователь в платном розыгрыше
+    if await is_user_in_raffle(user_id):
+        await message.answer("Вы уже участвуете в платном розыгрыше")
+        return
+
     if message.content_type == types.ContentType.PHOTO:
         # Получаем наибольшее качество фото
         file_id = message.photo[-1].file_id
@@ -63,6 +73,9 @@ async def approve_payment(callback_query: types.CallbackQuery):
 
     # Удаляем сообщение с кнопками
     await callback_query.message.delete()
+
+    # Отметить пользователя как участника розыгрыша
+    await mark_user_in_raffle(user_id)
 
     await bot.send_message(chat_id=user_id, text="Ваше подтверждение оплаты одобрено. Вы участвуете в розыгрыше!")
     await callback_query.answer("Оплата одобрена")

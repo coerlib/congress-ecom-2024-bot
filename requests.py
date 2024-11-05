@@ -77,13 +77,6 @@ async def select_random_raffle_user():
     return cur.fetchone()
 
 
-# Отмечает, что пользователь участвует в платном розыгрыше, и сохраняет путь к файлу
-async def mark_user_in_raffle(chat_id, file_path):
-    cur.execute(
-        "UPDATE users SET raffle_participant = 1, file_path = ? WHERE chat_id = ?", (file_path, chat_id))
-    db.commit()
-
-
 # Записывает вопросы и возможные ответы для соц опроса из массива данных
 async def save_questions_and_answers(questions_with_answers):
     """
@@ -113,20 +106,6 @@ async def save_user_response(user_id, question_id, answer_id):
     cur.execute("INSERT INTO user_survey_responses (question_id, answer_id) VALUES (?, ?)",
                 (question_id, answer_id))
     db.commit()
-
-
-# Проверяет, зарегистрирован ли пользователь
-async def is_user_registered(chat_id):
-    cur.execute("SELECT 1 FROM users WHERE chat_id = ?", (chat_id,))
-    return cur.fetchone() is not None
-
-
-# Проверяет, участвует ли пользователь в платном розыгрыше
-async def is_user_in_raffle(chat_id):
-    cur.execute(
-        "SELECT raffle_participant FROM users WHERE chat_id = ?", (chat_id,))
-    result = cur.fetchone()
-    return result is not None and result[0] == 1
 
 
 # Проверяет, начал ли пользователь проходить опрос (ответил хотя бы на один вопрос)
