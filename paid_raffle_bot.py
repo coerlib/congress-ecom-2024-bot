@@ -18,7 +18,10 @@ async def start_paid_raffle(message: types.Message):
         _, _, _, _, _, first_name, last_name, _, _, _ = user
         # Проверяем участие в розыгрыше
         if await is_user_in_raffle(message.from_user.id):
-            await message.answer("Вы уже участвуете в платном розыгрыше")
+            main_bot_url = MAIN_BOT_LINK
+            keyboard = InlineKeyboardMarkup().add(
+                InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
+            await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
         else:
             await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату.")
     else:
@@ -34,7 +37,10 @@ async def handle_payment_confirmation(message: types.Message):
 
     # Проверяем, участвует ли пользователь в платном розыгрыше
     if await is_user_in_raffle(user_id):
-        await message.answer("Вы уже участвуете в платном розыгрыше")
+        main_bot_url = MAIN_BOT_LINK
+        keyboard = InlineKeyboardMarkup().add(
+            InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
+        await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
         return
 
     if message.content_type == types.ContentType.PHOTO:
@@ -77,7 +83,10 @@ async def approve_payment(callback_query: types.CallbackQuery):
     # Отметить пользователя как участника розыгрыша
     await mark_user_in_raffle(user_id)
 
-    await bot.send_message(chat_id=user_id, text="Ваше подтверждение оплаты одобрено. Вы участвуете в розыгрыше!")
+    main_bot_url = MAIN_BOT_LINK
+    keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
+        "Перейти в основной бот", url=main_bot_url))
+    await bot.send_message(chat_id=user_id, text="Ваше подтверждение оплаты одобрено. Вы участвуете в розыгрыше!", reply_markup=keyboard)
     await callback_query.answer("Оплата одобрена")
 
     # Дублируем сообщение о том, что оплата одобрена на dev_id

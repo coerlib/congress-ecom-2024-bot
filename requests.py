@@ -161,3 +161,11 @@ async def get_survey_statistics():
                 percentage, 2))  # (количество, процент)
 
     return statistics
+
+
+# Проверяет, участвует ли пользователь в платном розыгрыше.
+async def is_user_in_raffle(chat_id):
+    cur.execute(
+        "SELECT raffle_participant FROM users WHERE chat_id = ?", (chat_id,))
+    result = cur.fetchone()
+    return result is not None and result[0] == 1

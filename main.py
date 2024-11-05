@@ -18,6 +18,11 @@ storage = MemoryStorage()
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 
+# Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
+menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+menu_keyboard.add(KeyboardButton("Платный розыгрыш"))
+menu_keyboard.add(KeyboardButton("Соц опрос"))
+
 
 async def on_start_up(_):
     await db_start()
@@ -27,7 +32,7 @@ async def on_start_up(_):
 async def cmd_start(message: types.Message):
     # Проверка, зарегистрирован ли пользователь
     if await check_user_exists(message.from_user.id):
-        await message.answer("Вы уже зарегистрированы!", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Вы уже зарегистрированы!", reply_markup=menu_keyboard)
         return
 
     # Если пользователь не зарегистрирован, запускаем опрос
@@ -75,12 +80,6 @@ async def process_last_name(message: types.Message, state: FSMContext):
     await message.answer("Нажмите на кнопку или введите номер телефона текстом:", reply_markup=keyboard)
 
 
-# Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
-menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-menu_keyboard.add(KeyboardButton("Платный розыгрыш"))
-menu_keyboard.add(KeyboardButton("Соц опрос"))
-
-
 @dp.message_handler(content_types=types.ContentTypes.CONTACT, state=Form.waiting_for_phone)
 async def process_contact(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
@@ -115,15 +114,19 @@ async def process_phone(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-# Добавляем обработчик для кнопки "Платный розыгрыш"
 @dp.message_handler(lambda message: message.text == "Платный розыгрыш")
 async def paid_raffle_handler(message: types.Message):
-    if await check_user_exists(message.from_user.id):
-        raffle_bot_url = PAID_BOT_LINK
-        keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
-            "Перейти к платному розыгрышу", url=raffle_bot_url))
+    user_id = message.from_user.id
 
-        await message.answer("Переход к платному розыгрышу:", reply_markup=keyboard)
+    if await check_user_exists(user_id):
+        if await is_user_in_raffle(user_id):
+            await message.answer("Вы уже участвуете в платном розыгрыше!", reply_markup=menu_keyboard)
+        else:
+            raffle_bot_url = PAID_BOT_LINK
+            keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
+                "Перейти к платному розыгрышу", url=raffle_bot_url))
+
+            await message.answer("Переход к платному розыгрышу:", reply_markup=keyboard)
     else:
         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
