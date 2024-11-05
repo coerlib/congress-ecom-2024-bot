@@ -23,7 +23,7 @@ async def start_paid_raffle(message: types.Message):
                 InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
             await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
         else:
-            await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату.")
+            await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату.\n\nСсылка на оплату - https://qr.nspk.ru/AS1A001L0PPJMNTT90MQCL98UAVS1U04?type=01&bank=100000000015&crc=0866\n\n#Мойдобрыйбизнес")
     else:
         main_bot_url = MAIN_BOT_LINK
         keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
