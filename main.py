@@ -125,7 +125,7 @@ async def paid_raffle_handler(message: types.Message):
 
         await message.answer("Переход к платному розыгрышу:", reply_markup=keyboard)
     else:
-        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь в основном боте, отправив команду /start")
+        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
 
 if __name__ == '__main__':
