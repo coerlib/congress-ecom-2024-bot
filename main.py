@@ -32,7 +32,7 @@ async def cmd_start(message: types.Message):
 
     # Если пользователь не зарегистрирован, запускаем опрос
     await Form.waiting_for_first_name.set()
-    await message.answer("Привет! Пожалуйста, введи своё имя.")
+    await message.answer("Здравствуйте! Введите своё имя")
 
 
 # todo ограничить доступ к функции
@@ -62,7 +62,7 @@ async def cmd_random_user(message: types.Message):
 async def process_first_name(message: types.Message, state: FSMContext):
     await state.update_data(first_name=message.text)
     await Form.waiting_for_last_name.set()
-    await message.answer("Спасибо! Теперь введи свою фамилию.")
+    await message.answer("Введи свою фамилию")
 
 
 @dp.message_handler(state=Form.waiting_for_last_name)
@@ -72,7 +72,7 @@ async def process_last_name(message: types.Message, state: FSMContext):
     phone_button = KeyboardButton(
         "Отправить номер телефона", request_contact=True)
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(phone_button)
-    await message.answer("Отлично! Нажми на кнопку или введи номер телефона текстом:", reply_markup=keyboard)
+    await message.answer("Нажмите на кнопку или введите номер телефона текстом:", reply_markup=keyboard)
 
 
 # Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
@@ -94,7 +94,7 @@ async def process_contact(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=menu_keyboard)
+    await message.answer("Спасибо за регистрацию! Вы участвуете в розыгрыше", reply_markup=menu_keyboard)
     await state.finish()
 
 
@@ -111,19 +111,21 @@ async def process_phone(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Ваши данные сохранены.", reply_markup=menu_keyboard)
+    await message.answer("Спасибо за регистрацию! Вы участвуете в розыгрыше", reply_markup=menu_keyboard)
     await state.finish()
 
 
 # Добавляем обработчик для кнопки "Платный розыгрыш"
 @dp.message_handler(lambda message: message.text == "Платный розыгрыш")
 async def paid_raffle_handler(message: types.Message):
-    # Создаем инлайн-кнопку с ссылкой на второго бота
-    raffle_bot_url = PAID_BOT_LINK
-    keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
-        "Перейти к платному розыгрышу", url=raffle_bot_url))
+    if await check_user_exists(message.from_user.id):
+        raffle_bot_url = PAID_BOT_LINK
+        keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
+            "Перейти к платному розыгрышу", url=raffle_bot_url))
 
-    await message.answer("Переходите к платному розыгрышу:", reply_markup=keyboard)
+        await message.answer("Переход к платному розыгрышу:", reply_markup=keyboard)
+    else:
+        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь в основном боте, отправив команду /start")
 
 
 if __name__ == '__main__':
