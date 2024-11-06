@@ -154,5 +154,65 @@ async def paid_raffle_handler(message: types.Message):
         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
 
+# соц опрос
+@dp.message_handler(commands=['res'])
+async def poll(message: types.Message):
+    # if message.from_user.id == 5191637494 or message.from_user.id == 1832079752:
+    #     await bot.send_message(message.from_user.id, await get_statistics())
+    # todo вернуть закрытый доступ
+    await bot.send_message(message.from_user.id, await get_statistics())
+
+
+@dp.message_handler(lambda message: message.text == "Соц опрос")
+async def paid_raffle_handler(message: types.Message):
+    user_id = message.from_user.id
+
+    if await check_user_exists(user_id):
+        if await has_user_responses(user_id):
+            await bot.send_message(user_id, "Вы не можете начать опрос заново")
+            return
+        else:
+            await display_question(user_id, 1)
+    else:
+        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
+
+
+async def display_question(chat_id, question_id):
+    if await get_total_questions_count() < question_id:
+        await bot.send_message(chat_id, "Вы ответили на все вопросы. Спасибо за участие!")
+        return
+
+    question_data = await get_question_and_answers(question_id)
+    if question_data:
+        question_text = question_data['question_text']
+        answers = question_data['answers']
+        answer_type = question_data['answer_type']
+        if answer_type:
+            answer_type = True
+        else:
+            answer_type = False
+
+        poll = await bot.send_poll(
+            chat_id=chat_id,
+            question=question_text,
+            options=answers,
+            type='regular',
+            allows_multiple_answers=answer_type,
+            is_anonymous=False
+        )
+
+        await save_poll(poll.poll.id, question_id, poll.message_id)
+
+
+@dp.poll_answer_handler()
+async def handle_poll_answer(answers: types.PollAnswer):
+    await add_user_response(answers.user.id, answers.poll_id, answers.option_ids)
+
+    await bot.stop_poll(answers.user.id, await get_message_id_by_poll_id(answers.poll_id))
+
+    question_id = await get_question_id_by_poll_id(answers.poll_id)
+    await display_question(answers.user.id, question_id + 1)
+
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True, on_startup=on_start_up)
