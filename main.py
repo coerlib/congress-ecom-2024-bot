@@ -41,26 +41,26 @@ async def cmd_start(message: types.Message):
 
 
 # todo ограничить доступ к функции
-@dp.message_handler(commands=['random_user'])
-async def cmd_random_user(message: types.Message):
-    user = await select_random_user()
-    if user:
-        user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
+# @dp.message_handler(commands=['random_user'])
+# async def cmd_random_user(message: types.Message):
+#     user = await select_random_user()
+#     if user:
+#         user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
 
-        # Маскируем номер телефона
-        if tg_phone:
-            masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
-        else:
-            masked_phone = "не указан"
+#         # Маскируем номер телефона
+#         if tg_phone:
+#             masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
+#         else:
+#             masked_phone = "не указан"
 
-        response = (
-            f"Имя: {first_name}\n"
-            f"Фамилия: {last_name}\n"
-            f"Телефон: {masked_phone}"
-        )
-    else:
-        response = "Пользователи не найдены."
-    await message.answer(response)
+#         response = (
+#             f"Имя: {first_name}\n"
+#             f"Фамилия: {last_name}\n"
+#             f"Телефон: {masked_phone}"
+#         )
+#     else:
+#         response = "Пользователи не найдены."
+#     await message.answer(response)
 
 
 # todo ограничить доступ к функции
@@ -155,11 +155,10 @@ async def paid_raffle_handler(message: types.Message):
 
 
 # соц опрос
+
+# todo ограничить доступ к функции
 @dp.message_handler(commands=['res'])
 async def poll(message: types.Message):
-    # if message.from_user.id == 5191637494 or message.from_user.id == 1832079752:
-    #     await bot.send_message(message.from_user.id, await get_statistics())
-    # todo вернуть закрытый доступ
     await bot.send_message(message.from_user.id, await get_statistics())
 
 
