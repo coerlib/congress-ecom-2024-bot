@@ -18,6 +18,10 @@ storage = MemoryStorage()
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 
+
+
+# todo добавить фунцию которая будет всегда обновлять кнопки в боте динамически
+
 # Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
 menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 menu_keyboard.add(KeyboardButton("Платный розыгрыш"))
