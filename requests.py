@@ -19,7 +19,7 @@ async def db_start():
         last_name TEXT,
         first_name TEXT,
         phone TEXT,
-        raffle_participant INTEGER DEFAULT 0,  -- 1 для участия, 0 для отсутствия
+        raffle_participant INTEGER DEFAULT 0,  -- 1 для участия, 0 для отсутствия, -1 для ожидания проверки
         file_path TEXT
     )''')
 

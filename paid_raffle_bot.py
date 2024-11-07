@@ -42,6 +42,9 @@ async def handle_payment_confirmation(message: types.Message):
             InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
         await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
         return
+    elif await is_user_waiting_for_approval(user_id):
+        await message.answer("Ваше подтверждение на проверке, пожалуйста, ожидайте ответа от модератора.")
+        return
 
     if message.content_type == types.ContentType.PHOTO:
         # Получаем наибольшее качество фото
@@ -58,6 +61,9 @@ async def handle_payment_confirmation(message: types.Message):
         await bot.send_document(chat_id=DEV_ID, document=file_id, caption=f"Дубл. Подтверждение оплаты ({user_id})")
 
     await message.answer("Ваш файл отправлен на проверку")
+
+    # Отмечаем, что пользователь ожидает проверки
+    await mark_user_waiting_for_approval(user_id)
 
     approval_keyboard = InlineKeyboardMarkup()
     approval_keyboard.row(
@@ -102,6 +108,9 @@ async def reject_payment(callback_query: types.CallbackQuery):
 
     # Удаляем сообщение с кнопками
     await callback_query.message.delete()
+    
+     # Снимаем статус ожидания (ставим на 0)
+    await reset_user_raffle_status(user_id)
 
     await bot.send_message(chat_id=user_id, text="Ваше подтверждение оплаты не прошло. Пожалуйста, загрузите другое подтверждение")
     await callback_query.answer("Оплата отклонена")
