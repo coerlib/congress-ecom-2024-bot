@@ -108,8 +108,9 @@ async def reject_payment(callback_query: types.CallbackQuery):
 
     # Удаляем сообщение с кнопками
     await callback_query.message.delete()
-    
-     # Снимаем статус ожидания (ставим на 0)
+
+    # todo надо проверить правильно ли работает
+    # Снимаем статус ожидания (ставим на 0)
     await reset_user_raffle_status(user_id)
 
     await bot.send_message(chat_id=user_id, text="Ваше подтверждение оплаты не прошло. Пожалуйста, загрузите другое подтверждение")
