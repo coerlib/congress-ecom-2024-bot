@@ -34,13 +34,13 @@ async def on_start_up(_):
 
 @dp.message_handler(commands=['res'])
 async def poll(message: types.Message):
-    if message.message.from_user.id == ANASTASIA_ID or message.message.from_user.id == DEV_ID:
+    if message.from_user.id == ANASTASIA_ID or message.from_user.id == DEV_ID:
         await bot.send_message(message.from_user.id, await get_statistics())
 
 
 @dp.message_handler(commands=['usr'])
 async def cmd_random_user(message: types.Message):
-    if message.message.from_user.id == ANASTASIA_ID or message.message.from_user.id == DEV_ID:
+    if message.from_user.id == ANASTASIA_ID or message.from_user.id == DEV_ID:
         user = await select_random_raffle_user()
         if user:
             user_id, tg_username, tg_phone, tg_first_name, tg_last_name, last_name, first_name, phone, _, _ = user
