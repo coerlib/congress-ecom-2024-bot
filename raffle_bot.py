@@ -15,7 +15,7 @@ async def on_start_up(_):
 async def start_paid_raffle(message: types.Message):
     user = await get_user_data(message.from_user.id)
     if user:
-        _, _, _, _, _, last_name, first_name , _, _, _ = user
+        _, _, _, _, _, last_name, first_name, _, _, _ = user
         # Проверяем участие в розыгрыше
         if await is_user_in_raffle(message.from_user.id):
             await message.answer(
@@ -118,7 +118,6 @@ async def reject_payment(callback_query: types.CallbackQuery):
     # Удаляем сообщение с кнопками
     await callback_query.message.delete()
 
-    # todo надо проверить правильно ли работает
     # Снимаем статус ожидания (ставим на 0)
     await reset_user_raffle_status(user_id)
 

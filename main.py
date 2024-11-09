@@ -32,32 +32,32 @@ async def on_start_up(_):
     await db_start()
 
 
-# todo ограничить доступ к функции
 @dp.message_handler(commands=['res'])
 async def poll(message: types.Message):
-    await bot.send_message(message.from_user.id, await get_statistics())
+    if message.message.from_user.id == ANASTASIA_ID or message.message.from_user.id == DEV_ID:
+        await bot.send_message(message.from_user.id, await get_statistics())
 
 
-# todo ограничить доступ к функции
-@dp.message_handler(commands=['random_user'])
+@dp.message_handler(commands=['usr'])
 async def cmd_random_user(message: types.Message):
-    user = await select_random_raffle_user()
-    if user:
-        user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
+    if message.message.from_user.id == ANASTASIA_ID or message.message.from_user.id == DEV_ID:
+        user = await select_random_raffle_user()
+        if user:
+            user_id, tg_username, tg_phone, tg_first_name, tg_last_name, last_name, first_name, phone, _, _ = user
 
-        if tg_phone:
-            masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
+            if tg_phone:
+                masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
+            else:
+                masked_phone = "не указан"
+
+            response = (
+                f"Имя: {first_name}\n"
+                f"Фамилия: {last_name}\n"
+                f"Телефон: {masked_phone}"
+            )
         else:
-            masked_phone = "не указан"
-
-        response = (
-            f"Имя: {first_name}\n"
-            f"Фамилия: {last_name}\n"
-            f"Телефон: {masked_phone}"
-        )
-    else:
-        response = "Пользователи не найдены."
-    await message.answer(response)
+            response = "Пользователи не найдены."
+        await message.answer(response)
 
 
 @dp.message_handler(commands=['start'])
