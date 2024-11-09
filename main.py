@@ -19,62 +19,32 @@ bot = Bot(API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 
 
-
-# todo добавить фунцию которая будет всегда обновлять кнопки в боте динамически
-
-# Создаем клавиатуру с кнопками "Платный розыгрыш" и "Соц опрос"
-menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-menu_keyboard.add(KeyboardButton("Платный розыгрыш"))
-menu_keyboard.add(KeyboardButton("Соц опрос"))
+async def get_raffle_keyboard(user_id):
+    if await is_user_in_raffle(user_id):
+        return ReplyKeyboardRemove()
+    else:
+        raffle_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+        raffle_keyboard.add(KeyboardButton("Участие в розыгрыше"))
+        return raffle_keyboard
 
 
 async def on_start_up(_):
     await db_start()
 
 
-@dp.message_handler(commands=['start'])
-async def cmd_start(message: types.Message):
-    # Проверка, зарегистрирован ли пользователь
-    if await check_user_exists(message.from_user.id):
-        await message.answer("Вы уже зарегистрированы!", reply_markup=menu_keyboard)
-        return
-
-    # Если пользователь не зарегистрирован, запускаем опрос
-    await Form.waiting_for_first_name.set()
-    await message.answer("Здравствуйте! Введите своё имя")
+# todo ограничить доступ к функции
+@dp.message_handler(commands=['res'])
+async def poll(message: types.Message):
+    await bot.send_message(message.from_user.id, await get_statistics())
 
 
 # todo ограничить доступ к функции
-# @dp.message_handler(commands=['random_user'])
-# async def cmd_random_user(message: types.Message):
-#     user = await select_random_user()
-#     if user:
-#         user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
-
-#         # Маскируем номер телефона
-#         if tg_phone:
-#             masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
-#         else:
-#             masked_phone = "не указан"
-
-#         response = (
-#             f"Имя: {first_name}\n"
-#             f"Фамилия: {last_name}\n"
-#             f"Телефон: {masked_phone}"
-#         )
-#     else:
-#         response = "Пользователи не найдены."
-#     await message.answer(response)
-
-
-# todo ограничить доступ к функции
-@dp.message_handler(commands=['random_paid_user'])
+@dp.message_handler(commands=['random_user'])
 async def cmd_random_user(message: types.Message):
     user = await select_random_raffle_user()
     if user:
         user_id, tg_username, tg_phone, tg_first_name, tg_last_name, first_name, last_name, phone, _, _ = user
 
-        # Маскируем номер телефона
         if tg_phone:
             masked_phone = '*' * (len(tg_phone) - 4) + tg_phone[-4:]
         else:
@@ -90,11 +60,23 @@ async def cmd_random_user(message: types.Message):
     await message.answer(response)
 
 
+@dp.message_handler(commands=['start'])
+async def cmd_start(message: types.Message):
+    # Проверка, зарегистрирован ли пользователь
+    if await check_user_exists(message.from_user.id):
+        await message.answer("Вы уже зарегистрированы!", reply_markup=(await get_raffle_keyboard(message.from_user.id)))
+        return
+
+    # Если пользователь не зарегистрирован, запускаем опрос
+    await Form.waiting_for_first_name.set()
+    await message.answer("Здравствуйте! Введите свое имя.")
+
+
 @dp.message_handler(state=Form.waiting_for_first_name)
 async def process_first_name(message: types.Message, state: FSMContext):
     await state.update_data(first_name=message.text)
     await Form.waiting_for_last_name.set()
-    await message.answer("Введи свою фамилию")
+    await message.answer("Введите свою фамилию.")
 
 
 @dp.message_handler(state=Form.waiting_for_last_name)
@@ -104,7 +86,7 @@ async def process_last_name(message: types.Message, state: FSMContext):
     phone_button = KeyboardButton(
         "Отправить номер телефона", request_contact=True)
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(phone_button)
-    await message.answer("Нажмите на кнопку или введите номер телефона текстом:", reply_markup=keyboard)
+    await message.answer("Нажмите на кнопку или введите номер телефона текстом.", reply_markup=keyboard)
 
 
 @dp.message_handler(content_types=types.ContentTypes.CONTACT, state=Form.waiting_for_phone)
@@ -120,8 +102,18 @@ async def process_contact(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Вы участвуете в розыгрыше", reply_markup=menu_keyboard)
+    await message.answer("Спасибо за регистрацию!", reply_markup=(await get_raffle_keyboard(message.from_user.id)))
     await state.finish()
+
+    user_id = message.from_user.id
+    if await check_user_exists(user_id):
+        if await has_user_responses(user_id):
+            await bot.send_message(user_id, "Вы уже запустили опрос и не можете начать его заново. Благодарим за участие!")
+            return
+        else:
+            await display_question(user_id, 1)
+    else:
+        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
 
 @dp.message_handler(state=Form.waiting_for_phone)
@@ -137,42 +129,13 @@ async def process_phone(message: types.Message, state: FSMContext):
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name')
     )
-    await message.answer("Спасибо за регистрацию! Вы участвуете в розыгрыше", reply_markup=menu_keyboard)
+    await message.answer("Спасибо за регистрацию!", reply_markup=(await get_raffle_keyboard(message.from_user.id)))
     await state.finish()
 
-
-@dp.message_handler(lambda message: message.text == "Платный розыгрыш")
-async def paid_raffle_handler(message: types.Message):
     user_id = message.from_user.id
-
-    if await check_user_exists(user_id):
-        if await is_user_in_raffle(user_id):
-            await message.answer("Вы уже участвуете в платном розыгрыше!", reply_markup=menu_keyboard)
-        else:
-            raffle_bot_url = PAID_BOT_LINK
-            keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
-                "Перейти к платному розыгрышу", url=raffle_bot_url))
-
-            await message.answer("Переход к платному розыгрышу:", reply_markup=keyboard)
-    else:
-        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
-
-
-# соц опрос
-
-# todo ограничить доступ к функции
-@dp.message_handler(commands=['res'])
-async def poll(message: types.Message):
-    await bot.send_message(message.from_user.id, await get_statistics())
-
-
-@dp.message_handler(lambda message: message.text == "Соц опрос")
-async def paid_raffle_handler(message: types.Message):
-    user_id = message.from_user.id
-
     if await check_user_exists(user_id):
         if await has_user_responses(user_id):
-            await bot.send_message(user_id, "Вы не можете начать опрос заново")
+            await bot.send_message(user_id, "Вы уже запустили опрос и не можете начать его заново. Благодарим за участие!")
             return
         else:
             await display_question(user_id, 1)
@@ -180,9 +143,39 @@ async def paid_raffle_handler(message: types.Message):
         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
 
+@dp.message_handler(lambda message: message.text == "Участие в розыгрыше")
+async def paid_raffle_handler(message: types.Message):
+    user_id = message.from_user.id
+
+    if await check_user_exists(user_id):
+        if await is_user_in_raffle(user_id):
+            await message.answer("Вы уже участвуете в розыгрыше!", reply_markup=(await get_raffle_keyboard(user_id)))
+        else:
+            raffle_bot_url = PAID_BOT_LINK
+            keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
+                "Перейти к розыгрышу", url=raffle_bot_url))
+
+            await message.answer("Переход к розыгрышу:", reply_markup=keyboard)
+    else:
+        await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
+
+
 async def display_question(chat_id, question_id):
     if await get_total_questions_count() < question_id:
-        await bot.send_message(chat_id, "Вы ответили на все вопросы. Спасибо за участие!")
+        if await is_user_in_raffle(chat_id):
+            await bot.send_message(
+                chat_id,
+                "Вы ответили на все вопросы. Благодарим Вас!",
+                reply_markup=(await get_raffle_keyboard(chat_id))
+            )
+        else:
+            await bot.send_message(
+                chat_id,
+                "Вы ответили на все вопросы. Благодарим Вас!\n"
+                "Приглашаем принять участие в розыгрыше! С условиями Вы можете ознакомиться, "
+                "нажав на кнопку ниже «Участие в розыгрыше».",
+                reply_markup=(await get_raffle_keyboard(chat_id))
+            )
         return
 
     question_data = await get_question_and_answers(question_id)

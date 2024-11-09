@@ -1,8 +1,14 @@
-API_TOKEN = "7739845456:AAEsJ4TyXbeBNwAHcI3MFjxOSNUcpLi6DXU"
-PAID_RAFFLE_BOT_TOKEN = "7540241474:AAE2Vp77c-7EpvTuG0R2EaZwndBQ9fkNciY"
+# API_TOKEN = "7739845456:AAEsJ4TyXbeBNwAHcI3MFjxOSNUcpLi6DXU"
+# PAID_RAFFLE_BOT_TOKEN = "7540241474:AAE2Vp77c-7EpvTuG0R2EaZwndBQ9fkNciY"
 
-MAIN_BOT_LINK = "https://t.me/ecom_2024_test_bot"
-PAID_BOT_LINK = "https://t.me/ecom_2024_test2_bot"
+# MAIN_BOT_LINK = "https://t.me/ecom_2024_test_bot"
+# PAID_BOT_LINK = "https://t.me/ecom_2024_test2_bot"
 
-MODERATOR_ID = 5191637494
+API_TOKEN = "7349101220:AAGjyDGniTzlj1yamDS7Xj2vXoxDEppqQLU"
+PAID_RAFFLE_BOT_TOKEN = "7580256001:AAG3hkzvi8_5kMKOa3VmqTT0YpHUjdqgdRs"
+
+MAIN_BOT_LINK = "https://t.me/ecommybusinessbot"
+PAID_BOT_LINK = "https://t.me/ecommybusinessgwbot"
+
+MODERATOR_ID = 1832079752
 DEV_ID = 5191637494

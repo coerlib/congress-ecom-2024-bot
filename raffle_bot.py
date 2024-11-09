@@ -15,15 +15,24 @@ async def on_start_up(_):
 async def start_paid_raffle(message: types.Message):
     user = await get_user_data(message.from_user.id)
     if user:
-        _, _, _, _, _, first_name, last_name, _, _, _ = user
+        _, _, _, _, _, last_name, first_name , _, _, _ = user
         # Проверяем участие в розыгрыше
         if await is_user_in_raffle(message.from_user.id):
-            main_bot_url = MAIN_BOT_LINK
-            keyboard = InlineKeyboardMarkup().add(
-                InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
-            await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
+            await message.answer(
+                "Вы уже участвуете в розыгрыше призов! Для помощи детям Курской области Вы можете осуществить перевод повторно по ссылке.\n\n"
+                "Ссылка для оплаты:\n"
+                "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
+                "Благодарим Вас!\n"
+                "#Мойдобрыйбизнес"
+            )
         else:
-            await message.answer(f"Добро пожаловать в платный розыгрыш. Для участия отправьте фото, подтверждающее оплату.\n\nСсылка на оплату - https://qr.nspk.ru/AS1A001L0PPJMNTT90MQCL98UAVS1U04?type=01&bank=100000000015&crc=0866\n\n#Мойдобрыйбизнес")
+            await message.answer(
+                f"{first_name}, добро пожаловать! Мы предлагаем Вам помочь детям Курской области и перевести любую сумму в Благотворительный фонд.\n"
+                "Для участия в розыгрыше направьте чек, подтверждающий оплату.\n\n"
+                "Ссылка для оплаты:\n"
+                "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
+                "#Мойдобрыйбизнес"
+            )
     else:
         main_bot_url = MAIN_BOT_LINK
         keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
@@ -35,12 +44,12 @@ async def start_paid_raffle(message: types.Message):
 async def handle_payment_confirmation(message: types.Message):
     user_id = message.from_user.id
 
-    # Проверяем, участвует ли пользователь в платном розыгрыше
+    # Проверяем, участвует ли пользователь в розыгрыше
     if await is_user_in_raffle(user_id):
         main_bot_url = MAIN_BOT_LINK
         keyboard = InlineKeyboardMarkup().add(
             InlineKeyboardButton("Перейти в основной бот", url=main_bot_url))
-        await message.answer("Вы уже участвуете в платном розыгрыше", reply_markup=keyboard)
+        await message.answer("Вы уже участвуете в розыгрыше", reply_markup=keyboard)
         return
     elif await is_user_waiting_for_approval(user_id):
         await message.answer("Ваше подтверждение на проверке, пожалуйста, ожидайте ответа от модератора.")
