@@ -6,6 +6,7 @@
 
 API_TOKEN = "7349101220:AAGjyDGniTzlj1yamDS7Xj2vXoxDEppqQLU"
 PAID_RAFFLE_BOT_TOKEN = "7580256001:AAG3hkzvi8_5kMKOa3VmqTT0YpHUjdqgdRs"
+RANDOM_BOT_TOKEN = "7751270525:AAH9qMZhvZS6CUJ_NT8A6g2osOhKAMMh23c"
 
 MAIN_BOT_LINK = "https://t.me/ecommybusinessbot"
 PAID_BOT_LINK = "https://t.me/ecommybusinessgwbot"
