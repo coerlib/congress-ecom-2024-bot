@@ -1,10 +1,20 @@
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.dispatcher import FSMContext
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import PAID_RAFFLE_BOT_TOKEN, MAIN_BOT_LINK, MODERATOR_ID, DEV_ID
 from requests_paid import *
 
+
+class Form(StatesGroup):
+    waiting_for_phone = State()
+
+
+storage = MemoryStorage()
 bot = Bot(PAID_RAFFLE_BOT_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=storage)
 
 
 async def on_start_up(_):
@@ -15,7 +25,7 @@ async def on_start_up(_):
 async def start_paid_raffle(message: types.Message):
     user = await get_user_data(message.from_user.id)
     if user:
-        _, _, _, _, _, last_name, first_name, _, _, _ = user
+        _, _, tg_phone, _, _, last_name, first_name, _, _, _ = user
         # Проверяем участие в розыгрыше
         if await is_user_in_raffle(message.from_user.id):
             await message.answer(
@@ -26,18 +36,57 @@ async def start_paid_raffle(message: types.Message):
                 "#Мойдобрыйбизнес"
             )
         else:
-            await message.answer(
-                f"{first_name}, добро пожаловать! Мы предлагаем Вам помочь детям Курской области и перевести любую сумму в Благотворительный фонд.\n"
-                "Для участия в розыгрыше направьте чек, подтверждающий оплату.\n\n"
-                "Ссылка для оплаты:\n"
-                "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
-                "#Мойдобрыйбизнес"
-            )
+            if tg_phone == "":
+                await Form.waiting_for_phone.set()
+                phone_button = KeyboardButton(
+                    "Отправить номер телефона", request_contact=True)
+                keyboard = ReplyKeyboardMarkup(
+                    resize_keyboard=True).add(phone_button)
+
+                await message.answer(f"{first_name}, добро пожаловать! Введите Ваш номер телефона.", reply_markup=keyboard)
+            else:
+                await message.answer(
+                    f"Мы предлагаем Вам помочь детям Курской области и перевести любую сумму в Благотворительный фонд.\n"
+                    "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
+                    "Ссылка для оплаты:\n"
+                    "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
+                    "#Мойдобрыйбизнес"
+                )
     else:
         main_bot_url = MAIN_BOT_LINK
         keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(
             "Перейти в основной бот", url=main_bot_url))
         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, сначала зарегистрируйтесь в основном боте", reply_markup=keyboard)
+
+
+@dp.message_handler(content_types=types.ContentTypes.CONTACT, state=Form.waiting_for_phone)
+async def process_contact(message: types.Message, state: FSMContext):
+    phone = message.contact.phone_number
+    await update_user_phone(message.from_user.id, phone)
+
+    await message.answer(
+        f"Мы предлагаем Вам помочь детям Курской области и перевести любую сумму в Благотворительный фонд.\n"
+        "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
+        "Ссылка для оплаты:\n"
+        "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
+        "#Мойдобрыйбизнес"
+    )
+    await state.finish()
+
+
+@dp.message_handler(state=Form.waiting_for_phone)
+async def process_phone(message: types.Message, state: FSMContext):
+    phone = message.text
+    await update_user_phone(message.from_user.id, phone)
+
+    await message.answer(
+        f"Мы предлагаем Вам помочь детям Курской области и перевести любую сумму в Благотворительный фонд.\n"
+        "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
+        "Ссылка для оплаты:\n"
+        "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
+        "#Мойдобрыйбизнес"
+    )
+    await state.finish()
 
 
 @dp.message_handler(content_types=[types.ContentType.DOCUMENT, types.ContentType.PHOTO])

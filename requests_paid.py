@@ -24,6 +24,16 @@ async def mark_user_in_raffle(chat_id, file_path=None):
     db.commit()
 
 
+# Просто обновляем телефон для существующего пользователя
+async def update_user_phone(chat_id, tg_phone):
+    cur.execute('''
+        UPDATE users
+        SET tg_phone = ?
+        WHERE chat_id = ?
+    ''', (tg_phone, chat_id))
+    db.commit()
+
+
 # Проверяет, участвует ли пользователь в платном розыгрыше.
 async def is_user_in_raffle(chat_id):
     cur.execute(

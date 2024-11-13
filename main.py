@@ -109,65 +109,6 @@ async def process_last_name(message: types.Message, state: FSMContext):
         reply_markup=(await get_raffle_keyboard(message.from_user.id))
     )
 
-    # await Form.waiting_for_phone.set()
-    # phone_button = KeyboardButton(
-    #     "Отправить номер телефона", request_contact=True)
-    # keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(phone_button)
-    # await message.answer("Нажмите на кнопку или введите номер телефона текстом.", reply_markup=keyboard)
-
-
-# @dp.message_handler(content_types=types.ContentTypes.CONTACT, state=Form.waiting_for_phone)
-# async def process_contact(message: types.Message, state: FSMContext):
-#     user_data = await state.get_data()
-#     phone = message.contact.phone_number
-#     await save_user(
-#         message.from_user.id,
-#         tg_username=message.from_user.username or "",
-#         tg_phone=phone,
-#         tg_first_name=message.from_user.first_name or "",
-#         tg_last_name=message.from_user.last_name or "",
-#         first_name=user_data.get('first_name'),
-#         last_name=user_data.get('last_name')
-#     )
-#     await message.answer("Спасибо за регистрацию!", reply_markup=(await get_raffle_keyboard(message.from_user.id)))
-#     await state.finish()
-
-#     user_id = message.from_user.id
-#     if await check_user_exists(user_id):
-#         if await has_user_responses(user_id):
-#             await bot.send_message(user_id, "Вы уже запустили опрос и не можете начать его заново. Благодарим за участие!")
-#             return
-#         else:
-#             await display_question(user_id, 1)
-#     else:
-#         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
-
-
-# @dp.message_handler(state=Form.waiting_for_phone)
-# async def process_phone(message: types.Message, state: FSMContext):
-#     user_data = await state.get_data()
-#     phone = message.text
-#     await save_user(
-#         message.from_user.id,
-#         tg_username=message.from_user.username or "",
-#         tg_phone=phone,
-#         tg_first_name=message.from_user.first_name or "",
-#         tg_last_name=message.from_user.last_name or "",
-#         first_name=user_data.get('first_name'),
-#         last_name=user_data.get('last_name')
-#     )
-#     await message.answer("Спасибо за регистрацию!", reply_markup=(await get_raffle_keyboard(message.from_user.id)))
-#     await state.finish()
-
-#     user_id = message.from_user.id
-#     if await check_user_exists(user_id):
-#         if await has_user_responses(user_id):
-#             await bot.send_message(user_id, "Вы уже запустили опрос и не можете начать его заново. Благодарим за участие!")
-#             return
-#         else:
-#             await display_question(user_id, 1)
-#     else:
-#         await message.answer("Извините, вы не зарегистрированы. Пожалуйста, зарегистрируйтесь, отправив команду /start")
 
 @dp.message_handler(lambda message: message.text == "Соц. опрос")
 async def survey_handler(message: types.Message):
