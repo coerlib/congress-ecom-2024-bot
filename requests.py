@@ -136,7 +136,7 @@ async def fill_questions_data():
         await add_question("Ваш ежемесячный оборот продаж?", answer_type=0)
         question_id_4 = cur.lastrowid
 
-        await add_question("Какую категорию товара Вы продаете?", answer_type=1)
+        await add_question("Какую категорию товара Вы продаете? (можно несколько вариантов)", answer_type=1)
         question_id_5 = cur.lastrowid
 
         await add_question("Кто производит товары, которые Вы продаете?", answer_type=0)
@@ -151,7 +151,7 @@ async def fill_questions_data():
         await add_question("Является ли для вас работа с МП полной занятостью или вы совмещаете с другой деятельностью?", answer_type=0)
         question_id_9 = cur.lastrowid
 
-        await add_question("Что Вы считаете самым важным для успешных продаж на маркетплейсах, исходя из своего опыта?", answer_type=1)
+        await add_question("Что Вы считаете самым важным для успешных продаж на маркетплейсах, исходя из своего опыта? (можно несколько вариантов)", answer_type=1)
         question_id_10 = cur.lastrowid
 
         await add_question("Используете ли Вы услуги по упаковке своего товара (фулфилмент)?", answer_type=0)
@@ -169,10 +169,11 @@ async def fill_questions_data():
         await add_answer(question_id_2, "30-45 лет", 2)
         await add_answer(question_id_2, "старше 45 лет", 3)
 
-        await add_answer(question_id_3, "меньше 1 года", 0)
-        await add_answer(question_id_3, "от 1 года до 2 лет", 1)
-        await add_answer(question_id_3, "от 2 до 5 лет", 2)
-        await add_answer(question_id_3, "больше 5 лет", 3)
+        await add_answer(question_id_3, "пока не продаю", 0)
+        await add_answer(question_id_3, "меньше 1 года", 1)
+        await add_answer(question_id_3, "от 1 года до 2 лет", 2)
+        await add_answer(question_id_3, "от 2 до 5 лет", 3)
+        await add_answer(question_id_3, "больше 5 лет", 4)
 
         await add_answer(question_id_4, "меньше 100 тысяч рублей", 0)
         await add_answer(question_id_4, "от 100 до 500 тысяч рублей", 1)
