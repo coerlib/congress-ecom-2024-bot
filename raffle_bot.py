@@ -50,7 +50,7 @@ async def start_paid_raffle(message: types.Message):
                     "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
                     "Ссылка для оплаты:\n"
                     "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
-                    "#Мойдобрыйбизнес"
+                    "#Мойдобрыйбизнес", reply_markup=ReplyKeyboardRemove()
                 )
     else:
         main_bot_url = MAIN_BOT_LINK
@@ -69,7 +69,7 @@ async def process_contact(message: types.Message, state: FSMContext):
         "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
         "Ссылка для оплаты:\n"
         "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
-        "#Мойдобрыйбизнес"
+        "#Мойдобрыйбизнес", reply_markup=ReplyKeyboardRemove()
     )
     await state.finish()
 
@@ -84,7 +84,7 @@ async def process_phone(message: types.Message, state: FSMContext):
         "Для участия в розыгрыше направьте чек в виде документа, подтверждающий оплату.\n\n"
         "Ссылка для оплаты:\n"
         "http://sberbank.com/sms/shpa/?cs=602497483482&psh=p&did=1730468347468000418\n\n"
-        "#Мойдобрыйбизнес"
+        "#Мойдобрыйбизнес", reply_markup=ReplyKeyboardRemove()
     )
     await state.finish()
 
